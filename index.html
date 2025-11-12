@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claqueta Digital de Programa</title>
+    <!-- Carga de Tailwind CSS para estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración de Tailwind para un color rojo y fuentes legibles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cinema-red': '#A80000',
+                        'off-white': '#f7f7f7',
+                        'slate-yellow': '#FACC15', /* Amarillo brillante para la toma */
+                    },
+                    fontFamily: {
+                        // Fuente Inter para el diseño de la app
+                        sans: ['Inter', 'sans-serif'],
+                        // Fuente monoespaciada (Roboto Mono) para la claqueta para mejor legibilidad
+                        mono: ['Roboto Mono', 'monospace'], 
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Carga de la fuente Roboto Mono para la claqueta -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght=700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos de la Pantalla de Claqueta (Modo Grabación) */
+        #clapboard-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000; 
+            color: #fff;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* Centrar verticalmente para aprovechar el espacio */
+            overflow: hidden;
+            touch-action: manipulation;
+            box-sizing: border-box; 
+        }
+
+        /* Contenedor principal para la información */
+        .clapboard-container {
+            width: 95vw;
+            max-width: 900px;
+            background-color: #000;
+            border: 4px solid #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Bloque principal de la toma, grande y amarillo */
+        .clapboard-main-block {
+            background-color: #1a1a1a;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            border-bottom: 2px solid #555;
+        }
+
+        /* Bloque de datos secundarios (en dos columnas para móvil) */
+        .clapboard-data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px; /* Separación mínima */
+            background-color: #555; /* color de las líneas divisorias */
+            padding: 1px;
+        }
+
+        .clapboard-cell {
+            background-color: #000; /* Fondo negro para cada celda de dato */
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .clapboard-cell-label {
+            font-size: 0.65rem; /* Texto muy pequeño para el título */
+            color: #ccc;
+            margin-bottom: 0.1rem;
+            font-weight: 400;
+        }
+
+        .clapboard-cell-value {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .clapboard-cell.full-width {
+            grid-column: span 2;
+        }
+        
+        /* Estilos específicos para la TOMA */
+        #display-take-large {
+            font-size: 5rem; /* 5xl en móvil */
+            line-height: 1;
+        }
+        @media (min-width: 768px) {
+            #display-take-large {
+                font-size: 8rem; /* 8xl en desktop */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans p-4 md:p-8 min-h-screen flex items-start justify-center">
+
+    <!-- Formulario de Entrada (Input View) -->
+    <div id="input-form-container" class="w-full max-w-lg bg-off-white rounded-xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+            <span class="text-cinema-red">Claqueta</span> Digital (Producción)
+        </h1>
+        <p class="text-gray-600 mb-8 text-center">Introduce los datos del programa y la toma.</p>
+
+        <form id="clapboard-form" class="space-y-4">
+            <!-- Nombre del Programa -->
+            <div>
+                <label for="programName" class="block text-sm font-medium text-gray-700">Nombre del Programa</label>
+                <input type="text" id="programName" value="DOCUMENTAL X" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+            </div>
+
+            <!-- Temporada y Programa Número -->
+            <div class="flex space-x-4">
+                <div class="flex-1">
+                    <label for="season" class="block text-sm font-medium text-gray-700">Temporada</label>
+                    <input type="text" id="season" value="T01" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+                </div>
+                <div class="flex-1">
+                    <label for="episode" class="block text-sm font-medium text-gray-700">Programa Número</label>
+                    <input type="text" id="episode" value="P05" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+                </div>
+            </div>
+
+            <!-- Operador de Cámara y Número de Cámaras -->
+            <div class="flex space-x-4">
+                 <div class="flex-1">
+                    <label for="cameraOp" class="block text-sm font-medium text-gray-700">Operador de Cámara</label>
+                    <input type="text" id="cameraOp" value="R. CÁMARA" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+                </div>
+                <div class="flex-1">
+                    <label for="numCameras" class="block text-sm font-medium text-gray-700">Núm. de Cámaras</label>
+                    <input type="text" id="numCameras" value="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+                </div>
+            </div>
+
+            <!-- Toma -->
+            <div>
+                <label for="take" class="block text-sm font-medium text-gray-700">Toma</label>
+                <input type="text" id="take" value="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+            </div>
+
+            <!-- Fecha de Grabación (EDITABLE) -->
+            <div>
+                <label for="recordDate" class="block text-sm font-medium text-gray-700">Fecha de Grabación (Editar si es necesario)</label>
+                <input type="text" id="recordDate" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red" placeholder="DD/MM/AAAA">
+            </div>
+
+            <!-- Comentarios -->
+            <div>
+                <label for="comments" class="block text-sm font-medium text-gray-700">Comentarios (Máx. 50 caracteres)</label>
+                <input type="text" id="comments" maxlength="50" value="ENTREVISTA PRINCIPAL" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+            </div>
+            
+            <!-- Botón de Generar Claqueta -->
+            <button type="button" onclick="generateClapboard()" class="w-full py-3 px-4 mt-6 bg-cinema-red text-white font-bold rounded-lg shadow-lg hover:bg-red-700 transition duration-150 transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-cinema-red focus:ring-offset-2">
+                ¡GENERAR CLAQUETA PARA CÁMARA!
+            </button>
+
+            <!-- Botón de Exportar Datos -->
+            <button type="button" onclick="exportData()" class="w-full py-2 px-4 mt-4 text-sm bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition duration-150">
+                EXPORTAR DATOS DE LA TOMA (TXT)
+            </button>
+        </form>
+    </div>
+
+    <!-- Pantalla de Claqueta (Output View) -->
+    <div id="clapboard-screen" class="font-mono" onclick="hideClapboard()">
+        <div class="clapboard-container">
+            
+            <!-- Bloque Principal de la TOMA (Color Rojo) -->
+            <div class="clapboard-main-block bg-cinema-red">
+                <div class="clapboard-cell-label text-white text-base">TOMA</div>
+                <div id="display-take-large" class="text-slate-yellow font-extrabold"></div>
+            </div>
+
+            <!-- Datos Fijos del Programa -->
+            <div class="clapboard-data-grid">
+                
+                <!-- Nombre del Programa -->
+                <div class="clapboard-cell full-width">
+                    <div class="clapboard-cell-label">NOMBRE DEL PROGRAMA</div>
+                    <div id="display-programName" class="clapboard-cell-value text-2xl"></div>
+                </div>
+
+                <!-- Temporada / Programa Número -->
+                <div class="clapboard-cell">
+                    <div class="clapboard-cell-label">TEMPORADA / PROGRAMA Nº</div>
+                    <div id="display-season-episode" class="clapboard-cell-value"></div>
+                </div>
+                
+                <!-- Fecha de Grabación -->
+                <div class="clapboard-cell">
+                    <div class="clapboard-cell-label">FECHA DE GRABACIÓN</div>
+                    <div id="display-date" class="clapboard-cell-value"></div>
+                </div>
+
+                <!-- Operador de Cámara -->
+                <div class="clapboard-cell">
+                    <div class="clapboard-cell-label">OPERADOR DE CÁMARA</div>
+                    <div id="display-cameraOp" class="clapboard-cell-value"></div>
+                </div>
+                
+                <!-- Número de Cámaras -->
+                <div class="clapboard-cell">
+                    <div class="clapboard-cell-label">NÚM. DE CÁMARAS</div>
+                    <div id="display-numCameras" class="clapboard-cell-value"></div>
+                </div>
+
+            </div>
+            
+            <!-- Comentarios (Opcional, se muestra si hay texto) -->
+            <div id="display-comments-container" class="clapboard-main-block bg-gray-900 border-t-2 border-gray-700" style="display:none;">
+                 <div class="clapboard-cell-label text-center">COMENTARIOS</div>
+                 <div id="display-comments" class="clapboard-cell-value text-center text-off-white text-lg"></div>
+            </div>
+        </div>
+
+        <!-- Instrucción para el usuario -->
+        <div class="absolute bottom-4 text-gray-500 text-sm text-center px-4">
+            Toca en cualquier parte para incrementar la TOMA.
+        </div>
+    </div>
+
+    <script>
+        // Función para obtener la fecha actual en formato DÍA/MES/AÑO
+        function getCurrentDate() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Función principal para generar y mostrar la claqueta
+        function generateClapboard() {
+            // 1. Obtener valores del formulario
+            const programName = document.getElementById('programName').value.toUpperCase();
+            const season = document.getElementById('season').value.toUpperCase();
+            const episode = document.getElementById('episode').value.toUpperCase();
+            const cameraOp = document.getElementById('cameraOp').value.toUpperCase();
+            const numCameras = document.getElementById('numCameras').value.toUpperCase();
+            const take = document.getElementById('take').value.toUpperCase();
+            const comments = document.getElementById('comments').value.toUpperCase();
+            
+            // Obtener la fecha del input
+            const date = document.getElementById('recordDate').value.toUpperCase() || getCurrentDate().toUpperCase();
+
+            // 2. Insertar valores en la pantalla de la claqueta
+            document.getElementById('display-programName').textContent = programName || 'SIN NOMBRE';
+            document.getElementById('display-date').textContent = date;
+            document.getElementById('display-cameraOp').textContent = cameraOp || 'SIN OPERADOR';
+            document.getElementById('display-numCameras').textContent = numCameras || '1';
+            
+            // Combinar Temporada y Programa Número
+            document.getElementById('display-season-episode').textContent = `${season || 'S/T'} / ${episode || 'S/P'}`;
+            document.getElementById('display-take-large').textContent = take || 'S/T';
+            
+            // Ocultar/Mostrar el contenedor de comentarios
+            const commentsContainer = document.getElementById('display-comments-container');
+            if (comments) {
+                commentsContainer.style.display = 'block';
+                document.getElementById('display-comments').textContent = comments;
+            } else {
+                commentsContainer.style.display = 'none';
+            }
+
+            // 3. Cambiar la vista
+            document.getElementById('input-form-container').style.display = 'none';
+            document.getElementById('clapboard-screen').style.display = 'flex';
+        }
+
+        // Función para ocultar la claqueta y volver al formulario
+        function hideClapboard() {
+            document.getElementById('clapboard-screen').style.display = 'none';
+            document.getElementById('input-form-container').style.display = 'block';
+            
+            // Aumentar el número de toma
+            const takeInput = document.getElementById('take');
+            let currentTake = parseInt(takeInput.value, 10);
+            if (!isNaN(currentTake)) {
+                takeInput.value = (currentTake + 1).toString();
+            } else {
+                // Si no era un número, lo pone en '1'
+                takeInput.value = '1'; 
+            }
+        }
+        
+        // Función para exportar todos los datos del formulario a un archivo de texto
+        function exportData() {
+            const programName = document.getElementById('programName').value;
+            const season = document.getElementById('season').value;
+            const episode = document.getElementById('episode').value;
+            const cameraOp = document.getElementById('cameraOp').value;
+            const numCameras = document.getElementById('numCameras').value;
+            const take = document.getElementById('take').value;
+            const recordDate = document.getElementById('recordDate').value;
+            const comments = document.getElementById('comments').value;
+
+            const dataContent = `--- REGISTRO DE TOMA ---\n` +
+                                `NOMBRE DEL PROGRAMA: ${programName}\n` +
+                                `TEMPORADA: ${season}\n` +
+                                `PROGRAMA NÚMERO: ${episode}\n` +
+                                `OPERADOR DE CÁMARA: ${cameraOp}\n` +
+                                `NÚM. DE CÁMARAS: ${numCameras}\n` +
+                                `TOMA: ${take}\n` +
+                                `FECHA DE GRABACIÓN: ${recordDate}\n` +
+                                `COMENTARIOS: ${comments}\n` +
+                                `------------------------\n`;
+
+            const blob = new Blob([dataContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const fileName = `Toma_${take}_${episode}_${programName.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Inicializar la fecha en el campo
+        document.addEventListener('DOMContentLoaded', () => {
+             document.getElementById('recordDate').value = getCurrentDate();
+        });
+    </script>
+</body>
+</html>
+
+
