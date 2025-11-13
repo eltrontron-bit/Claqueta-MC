@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claqueta Digital de Programa</title>
+    <title>Claqueta Digital Mijas Comunicación</title>
+    
     <!-- Carga de Tailwind CSS para estilos -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configuración de Tailwind para un color rojo y fuentes legibles -->
+    
+    <!-- Configuración de Tailwind para colores y fuentes -->
     <script>
         tailwind.config = {
             theme: {
@@ -17,19 +19,20 @@
                         'slate-yellow': '#FACC15', /* Amarillo brillante para la toma */
                     },
                     fontFamily: {
-                        // Fuente Inter para el diseño de la app
                         sans: ['Inter', 'sans-serif'],
-                        // Fuente monoespaciada (Roboto Mono) para la claqueta para mejor legibilidad
                         mono: ['Roboto Mono', 'monospace'], 
                     }
                 }
             }
         }
     </script>
+    
     <!-- Carga de la fuente Roboto Mono para la claqueta -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght=700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght:700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos de la Pantalla de Claqueta (Modo Grabación) */
+        /* ============================================== */
+        /* ESTILOS BASE (Vertical/Portrait) */
+        /* ============================================== */
         #clapboard-screen {
             display: none;
             width: 100vw;
@@ -38,16 +41,16 @@
             color: #fff;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Centrar verticalmente para aprovechar el espacio */
+            justify-content: center;
             overflow: hidden;
             touch-action: manipulation;
             box-sizing: border-box; 
         }
 
-        /* Contenedor principal para la información */
         .clapboard-container {
+            /* En vertical, maximiza el ancho */
             width: 95vw;
-            max-width: 900px;
+            max-width: 900px; /* Límite para pantallas grandes */
             background-color: #000;
             border: 4px solid #fff;
             border-radius: 8px;
@@ -56,37 +59,34 @@
             flex-direction: column;
         }
 
-        /* Bloque principal de la toma, grande y amarillo */
         .clapboard-main-block {
-            background-color: #1a1a1a;
             padding: 1rem 1.5rem;
             text-align: center;
             border-bottom: 2px solid #555;
         }
 
-        /* Bloque de datos secundarios (en dos columnas para móvil) */
         .clapboard-data-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 1px; /* Separación mínima */
-            background-color: #555; /* color de las líneas divisorias */
+            gap: 1px;
+            background-color: #555;
             padding: 1px;
         }
 
         .clapboard-cell {
-            background-color: #000; /* Fondo negro para cada celda de dato */
+            background-color: #000;
             padding: 0.5rem 0.75rem;
         }
         
         .clapboard-cell-label {
-            font-size: 0.65rem; /* Texto muy pequeño para el título */
+            font-size: 0.65rem;
             color: #ccc;
             margin-bottom: 0.1rem;
             font-weight: 400;
         }
 
         .clapboard-cell-value {
-            font-size: 1.25rem; /* text-xl */
+            font-size: 1.25rem;
             font-weight: 700;
             color: #fff;
             text-transform: uppercase;
@@ -94,19 +94,67 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
+        
+        /* Estilo para que los comentarios se envuelvan y no se recorten (ADAPTADO) */
+        .clapboard-cell-value.comments {
+            white-space: normal;
+            text-overflow: unset;
+            word-break: break-word;
+            height: auto; 
+            min-height: 40px; 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem; 
+            padding: 0.5rem 0; 
+        }
 
         .clapboard-cell.full-width {
             grid-column: span 2;
         }
         
-        /* Estilos específicos para la TOMA */
+        /* Tamaño de la TOMA en MODO VERTICAL/BASE (Móvil) */
         #display-take-large {
-            font-size: 5rem; /* 5xl en móvil */
+            font-size: 5rem; 
             line-height: 1;
         }
-        @media (min-width: 768px) {
+
+        /* ============================================== */
+        /* ADAPTACIÓN A PANTALLA HORIZONTAL (Landscape) */
+        /* ============================================== */
+        @media (orientation: landscape) {
+            
+            /* En horizontal, la claqueta se centra y maximiza la altura para evitar barras laterales */
+            #clapboard-screen {
+                justify-content: center;
+                align-items: center;
+            }
+
+            .clapboard-container {
+                /* Usar más altura para que sea más grande */
+                height: 90vh;
+                /* El ancho es proporcional a la altura para mantener un ratio visual agradable */
+                width: 75vw;
+                max-width: 120vh; /* Límite basado en la altura máxima */
+            }
+
+            /* Aumentar el tamaño de la TOMA para el modo horizontal */
             #display-take-large {
-                font-size: 8rem; /* 8xl en desktop */
+                font-size: 7rem;
+            }
+
+            /* Ajustar el tamaño de la fuente para mejor legibilidad en la pantalla ancha */
+            .clapboard-cell-value {
+                font-size: 1.5rem;
+            }
+            
+            .clapboard-cell-value.comments {
+                 font-size: 1.25rem;
+                 min-height: 50px;
+            }
+
+            .clapboard-cell-label {
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -116,7 +164,7 @@
     <!-- Formulario de Entrada (Input View) -->
     <div id="input-form-container" class="w-full max-w-lg bg-off-white rounded-xl shadow-2xl p-6 md:p-8">
         <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-            <span class="text-cinema-red">Claqueta</span> Digital (Producción)
+            <span class="text-cinema-red">Claqueta</span> Digital Mijas Comunicación
         </h1>
         <p class="text-gray-600 mb-8 text-center">Introduce los datos del programa y la toma.</p>
 
@@ -165,8 +213,8 @@
 
             <!-- Comentarios -->
             <div>
-                <label for="comments" class="block text-sm font-medium text-gray-700">Comentarios (Máx. 50 caracteres)</label>
-                <input type="text" id="comments" maxlength="50" value="ENTREVISTA PRINCIPAL" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
+                <label for="comments" class="block text-sm font-medium text-gray-700">Comentarios (Máx. 100 caracteres)</label>
+                <input type="text" id="comments" maxlength="100" value="ENTREVISTA PRINCIPAL - CONTEXTO ADICIONAL LARGO PARA PROBAR EL WRAP DE TEXTO" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-3 border focus:border-cinema-red focus:ring-cinema-red">
             </div>
             
             <!-- Botón de Generar Claqueta -->
@@ -229,7 +277,7 @@
             <!-- Comentarios (Opcional, se muestra si hay texto) -->
             <div id="display-comments-container" class="clapboard-main-block bg-gray-900 border-t-2 border-gray-700" style="display:none;">
                  <div class="clapboard-cell-label text-center">COMENTARIOS</div>
-                 <div id="display-comments" class="clapboard-cell-value text-center text-off-white text-lg"></div>
+                 <div id="display-comments" class="clapboard-cell-value text-center text-off-white text-lg comments"></div>
             </div>
         </div>
 
@@ -346,5 +394,4 @@
     </script>
 </body>
 </html>
-
 
